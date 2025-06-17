@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center py-12">
+        <h1 class="text-4xl font-bold text-white mb-4">Города</h1>
+        <p class="text-xl text-gray-400">Найдите стикеры в вашем городе</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% regroup cities by region as region_list %}
+        
+        {% for region in region_list %}
+        <div class="col-span-full mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">
+                {% if region.grouper %}{{ region.grouper }}{% else %}Без региона{% endif %}
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {% for city in region.list %}
+                <a href="{{ city.get_absolute_url }}" class="block">
+                    <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition-colors">
+                        <h3 class="text-xl font-semibold text-white mb-2">{{ city.name }}</h3>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">{{ city.sticker_set.count }} стикеров</span>
+                            <span class="text-gray-500">{{ city.user_set.count }} пользователей</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <p class="text-gray-400 text-lg">Города пока не добавлены</p>
+            {% if user.is_staff %}
+            <a href="{% url 'admin:cities_city_add' %}" class="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Добавить город
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Map Section -->
+    <div class="mt-12">
+        <div class="bg-gray-800 rounded-lg p-6">
+            <div id="map" class="h-96 rounded-lg" 
+                data-cities='[
+                    {% for city in cities %}
+                        {% if city.latitude and city.longitude %}
+                        {
+                            "lat": {{ city.latitude|stringformat:"f" }},
+                            "lon": {{ city.longitude|stringformat:"f" }},
+                            "name": "{{ city.name|escapejs }}",
+                            "url": "{{ city.get_absolute_url|escapejs }}",
+                            "count": {{ city.sticker_set.count }}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                ]'>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://api-maps.yandex.ru/2.1/?apikey=your-api-key&lang=ru_RU"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var mapElement = document.getElementById('map');
+    var cities = JSON.parse(mapElement.dataset.cities || '[]');
+
+    ymaps.ready(function() {
+        var map = new ymaps.Map('map', {
+            center: [55.76, 37.64],
+            zoom: 4
+        });
+
+        cities.forEach(function(city) {
+            var placemark = new ymaps.Placemark(
+                [city.lat, city.lon],
+                {
+                    balloonContent: '<a href="' + city.url + '" class="text-blue-500">' + 
+                                  city.name + '</a><br>' + city.count + ' стикеров'
+                },
+                {
+                    preset: 'islands#blueCircleDotIcon'
+                }
+            );
+            map.geoObjects.add(placemark);
+        });
+    });
+});
+</script>
+{% endblock %}
