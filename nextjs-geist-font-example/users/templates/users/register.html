@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 p-6 bg-gray-900 rounded-lg shadow-lg">
+  <h2 class="text-2xl font-bold mb-6 text-white">Регистрация</h2>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="mb-4">
+      <label class="block text-gray-300 mb-2">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}
+      <div class="text-red-500 text-sm mt-1">
+        {% for error in field.errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      Зарегистрироваться
+    </button>
+  </form>
+  <div class="mt-4 text-center text-gray-400">
+    Уже есть аккаунт? <a href="{% url 'users:login' %}" class="text-blue-500 hover:text-blue-400">Войти</a>
+  </div>
+</div>
+{% endblock %}
