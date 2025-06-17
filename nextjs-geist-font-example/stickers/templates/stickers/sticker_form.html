@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-10 p-6 bg-gray-900 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold mb-6 text-white">{{ title }}</h2>
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        
+        <!-- Title -->
+        <div class="mb-4">
+            <label for="{{ form.title.id_for_label }}" class="block text-gray-300 mb-2">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in form.title.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+            <label for="{{ form.description.id_for_label }}" class="block text-gray-300 mb-2">{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in form.description.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Image -->
+        <div class="mb-4">
+            <label for="{{ form.image.id_for_label }}" class="block text-gray-300 mb-2">{{ form.image.label }}</label>
+            {{ form.image }}
+            {% if form.image.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in form.image.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Category and City -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="block text-gray-300 mb-2">{{ form.category.label }}</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {% for error in form.category.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <div>
+                <label for="{{ form.city.id_for_label }}" class="block text-gray-300 mb-2">{{ form.city.label }}</label>
+                {{ form.city }}
+                {% if form.city.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {% for error in form.city.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Price -->
+        <div class="mb-4">
+            <label for="{{ form.price.id_for_label }}" class="block text-gray-300 mb-2">{{ form.price.label }}</label>
+            {{ form.price }}
+            {% if form.price.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in form.price.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Is Available -->
+        <div class="mb-6">
+            <label class="inline-flex items-center">
+                {{ form.is_available }}
+                <span class="ml-2 text-gray-300">{{ form.is_available.label }}</span>
+            </label>
+            {% if form.is_available.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in form.is_available.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'stickers:home' %}" class="px-6 py-2 bg-gray-700 text-white rounded hover:bg-gray-600">
+                Отмена
+            </a>
+            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                {% if sticker %}Сохранить{% else %}Создать{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Preview Script -->
+<script>
+    document.getElementById('{{ form.image.id_for_label }}').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.src = e.target.result;
+                preview.className = 'mt-4 max-w-full h-auto rounded';
+                
+                const previewContainer = document.querySelector('.text-center');
+                const existingPreview = previewContainer.querySelector('img');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+                previewContainer.appendChild(preview);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
